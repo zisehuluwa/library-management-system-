@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理 - 智慧图书馆</title>
+    <link rel="stylesheet" href="/static/css/antd-style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="logo">
+                <div class="logo-icon">📚</div>
+                <span class="logo-text">智慧图书馆</span>
+            </a>
+            <nav class="nav">
+                <a href="/admin/dashboard" class="nav-item">仪表盘</a>
+                <a href="/admin/users" class="nav-item active">用户</a>
+                <a href="/admin/ranking" class="nav-item">排行</a>
+                <a href="/admin/add-book" class="nav-item">添加</a>
+            </nav>
+        </div>
+        <div class="header-right">
+            <div class="user-avatar">A</div>
+            <a href="/logout" class="btn btn-outline">退出</a>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="message message-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="card">
+                <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--gray-100); display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="font-size: 1rem;">用户列表</h3>
+                    <span style="color: var(--gray-500); font-size: 0.85rem;">共 {{ users|length }} 人</span>
+                </div>
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>用户</th>
+                                <th>角色</th>
+                                <th>状态</th>
+                                <th>注册时间</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.8rem;">{{ user.username[0:1] }}</div>
+                                        <span style="font-weight: 500;">{{ user.username }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if user.role == 'admin' %}
+                                        <span class="tag tag-purple">管理员</span>
+                                    {% else %}
+                                        <span class="tag">普通用户</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if user.status == 'normal' %}
+                                        <span class="tag tag-success">正常</span>
+                                    {% else %}
+                                        <span class="tag tag-danger">已冻结</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ user.created_at.strftime('%Y-%m-%d') if user.created_at else '-' }}</td>
+                                <td>
+                                    {% if user.role != 'admin' %}
+                                        <a href="/admin/reset-password/{{ user.id }}" class="btn btn-outline" onclick="return confirm('重置密码？')">重置</a>
+                                        <a href="/admin/toggle-user-status/{{ user.id }}" class="btn {% if user.status == 'normal' %}btn-outline{% else %}btn-primary{% endif %}" style="margin-left: 4px;">
+                                            {{ '冻结' if user.status == 'normal' else '解封' }}
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

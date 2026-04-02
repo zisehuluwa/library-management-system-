@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧图书馆</title>
+    <link rel="stylesheet" href="/static/css/antd-style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="logo">
+                <div class="logo-icon">📚</div>
+                <span class="logo-text">智慧图书馆</span>
+            </a>
+            <nav class="nav">
+                <a href="/" class="nav-item active">首页</a>
+                <a href="/search" class="nav-item">找书</a>
+                <a href="/my-books" class="nav-item">借阅</a>
+                <a href="/profile" class="nav-item">我的</a>
+            </nav>
+        </div>
+        <div class="header-right">
+            {% if session.username %}
+                <div class="user-avatar">{{ session.username[0:1] }}</div>
+            {% else %}
+                <a href="/login" class="btn btn-primary">登录</a>
+                <a href="/register" class="btn btn-outline">注册</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="message message-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="search-card">
+                <form class="search-row" action="/search" method="GET">
+                    <div class="search-input-wrap">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" name="keyword" class="search-input" placeholder="搜索书名、作者..." value="{{ keyword or '' }}">
+                    </div>
+                    <select name="category" class="search-select">
+                        <option value="">全部分类</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-primary">搜索</button>
+                </form>
+            </div>
+
+            <div class="book-grid">
+                {% for book in books %}
+                <div class="book-card">
+                    <div class="book-cover">📖</div>
+                    <div class="book-info">
+                        <div class="book-title">{{ book.title }}</div>
+                        <div class="book-author">{{ book.author }}</div>
+                        <span class="book-status {% if book.available_copies > 0 %}available{% else %}unavailable{% endif %}">
+                            {% if book.available_copies > 0 %}可借{% else %}已借完{% endif %}
+                        </span>
+                        <div class="book-action">
+                            {% if session.username and book.available_copies > 0 and session.role != 'admin' %}
+                                <a href="/borrow/{{ book.id }}" class="btn btn-success" onclick="return confirm('借阅《{{ book.title }}》？')">借阅</a>
+                            {% elif session.role == 'admin' %}
+                                <a href="/admin/edit-book/{{ book.id }}" class="btn btn-outline">编辑</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+</body>
+</html>

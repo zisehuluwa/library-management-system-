@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理后台 - 智慧图书馆</title>
+    <link rel="stylesheet" href="/static/css/antd-style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="logo">
+                <div class="logo-icon">📚</div>
+                <span class="logo-text">智慧图书馆</span>
+            </a>
+            <nav class="nav">
+                <a href="/admin/dashboard" class="nav-item active">仪表盘</a>
+                <a href="/admin/users" class="nav-item">用户</a>
+                <a href="/admin/ranking" class="nav-item">排行</a>
+                <a href="/admin/add-book" class="nav-item">添加</a>
+            </nav>
+        </div>
+        <div class="header-right">
+            <div class="user-avatar">A</div>
+            <a href="/logout" class="btn btn-outline">退出</a>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem;">
+                <div class="card" style="padding: 1.5rem; text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 4px;">👥</div>
+                    <div style="font-size: 1.5rem; font-weight: 600;">{{ total_users }}</div>
+                    <div style="color: var(--gray-500); font-size: 0.85rem;">注册用户</div>
+                </div>
+                <div class="card" style="padding: 1.5rem; text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 4px;">📚</div>
+                    <div style="font-size: 1.5rem; font-weight: 600;">{{ total_books }}</div>
+                    <div style="color: var(--gray-500); font-size: 0.85rem;">图书总数</div>
+                </div>
+                <div class="card" style="padding: 1.5rem; text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 4px;">📖</div>
+                    <div style="font-size: 1.5rem; font-weight: 600;">{{ total_borrowed }}</div>
+                    <div style="color: var(--gray-500); font-size: 0.85rem;">当前借阅</div>
+                </div>
+                <div class="card" style="padding: 1.5rem; text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 4px;">⚠️</div>
+                    <div style="font-size: 1.5rem; font-weight: 600; color: var(--danger);">{{ overdue_count }}</div>
+                    <div style="color: var(--gray-500); font-size: 0.85rem;">超期未还</div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+                <div class="card" style="padding: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem; font-size: 1rem;">📊 图书分类统计</h3>
+                    <canvas id="categoryChart" style="max-height: 200px;"></canvas>
+                </div>
+                <div class="card" style="padding: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem; font-size: 1rem;">📈 借阅趋势</h3>
+                    <canvas id="monthlyChart" style="max-height: 200px;"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--gray-100);">
+                    <h3 style="font-size: 1rem;">📋 最近借阅</h3>
+                </div>
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>图书</th>
+                                <th>借阅人</th>
+                                <th>日期</th>
+                                <th>应还</th>
+                                <th>状态</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in recent_borrows %}
+                            <tr>
+                                <td style="font-weight: 500;">{{ record.book.title }}</td>
+                                <td>{{ record.user.username }}</td>
+                                <td>{{ record.borrow_date.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ record.due_date.strftime('%Y-%m-%d') if record.due_date else '-' }}</td>
+                                <td>
+                                    {% if record.status == 'borrowed' %}
+                                        {% if record.due_date and record.due_date < now %}
+                                            <span class="tag tag-danger">超期</span>
+                                        {% else %}
+                                            <span class="tag tag-warning">借阅中</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="tag tag-success">已归还</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const categories = {{ categories_stats|map(attribute=0)|list|tojson }};
+        const categoryCounts = {{ categories_stats|map(attribute=1)|list|tojson }};
+        new Chart(document.getElementById('categoryChart'), {
+            type: 'doughnut',
+            data: { labels: categories, datasets: [{ data: categoryCounts, backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#06b6d4'] }] }
+        });
+
+        const months = {{ monthly_stats|map(attribute='month')|list|tojson }};
+        const counts = {{ monthly_stats|map(attribute='count')|list|tojson }};
+        new Chart(document.getElementById('monthlyChart'), {
+            type: 'bar',
+            data: { labels: months, datasets: [{ label: '借阅', data: counts, backgroundColor: '#3b82f6', borderRadius: 6 }] }
+        });
+    </script>
+</body>
+</html>

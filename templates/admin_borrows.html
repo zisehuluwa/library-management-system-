@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>借阅记录 - 智慧图书馆</title>
+    <link rel="stylesheet" href="/static/css/antd-style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="logo">
+                <div class="logo-icon">📚</div>
+                <span class="logo-text">智慧图书馆</span>
+            </a>
+            <nav class="nav">
+                <a href="/admin/dashboard" class="nav-item">仪表盘</a>
+                <a href="/admin/users" class="nav-item">用户</a>
+                <a href="/admin/ranking" class="nav-item">排行</a>
+                <a href="/admin/add-book" class="nav-item">添加</a>
+            </nav>
+        </div>
+        <div class="header-right">
+            <div class="user-avatar">A</div>
+            <a href="/logout" class="btn btn-outline">退出</a>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <div class="card">
+                <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--gray-100); display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="font-size: 1rem;">借阅记录</h3>
+                    <span style="color: var(--gray-500); font-size: 0.85rem;">共 {{ records|length }} 条</span>
+                </div>
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>用户</th>
+                                <th>图书</th>
+                                <th>借阅日期</th>
+                                <th>应还日期</th>
+                                <th>状态</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in records %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ record.user.username }}</td>
+                                <td style="font-weight: 500;">{{ record.book.title if record.book else record.book_title }}</td>
+                                <td>{{ record.borrow_date.strftime('%Y-%m-%d') if record.borrow_date else '-' }}</td>
+                                <td>{{ record.due_date.strftime('%Y-%m-%d') if record.due_date else '-' }}</td>
+                                <td>
+                                    {% if record.status == 'borrowed' %}
+                                        {% if record.due_date and record.due_date < datetime.utcnow() %}
+                                            <span class="tag tag-danger">超期</span>
+                                        {% else %}
+                                            <span class="tag tag-warning">借阅中</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="tag tag-success">已归还</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

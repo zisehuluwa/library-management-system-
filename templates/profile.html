@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - 智慧图书馆</title>
+    <link rel="stylesheet" href="/static/css/antd-style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="logo">
+                <div class="logo-icon">📚</div>
+                <span class="logo-text">智慧图书馆</span>
+            </a>
+            <nav class="nav">
+                <a href="/" class="nav-item">首页</a>
+                <a href="/search" class="nav-item">找书</a>
+                <a href="/my-books" class="nav-item">借阅</a>
+                <a href="/profile" class="nav-item active">我的</a>
+            </nav>
+        </div>
+        <div class="header-right">
+            {% if session.username %}
+                <div class="user-avatar">{{ session.username[0:1] }}</div>
+                <a href="/logout" class="btn btn-outline">退出</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="message message-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="card" style="padding: 2rem; margin-bottom: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <div class="user-avatar" style="width: 64px; height: 64px; font-size: 1.5rem;">{{ user.username[0:1] }}</div>
+                    <div>
+                        <h2 style="font-size: 1.25rem; margin-bottom: 4px;">{{ user.username }}</h2>
+                        <span class="tag {% if user.role == 'admin' %}tag-purple{% else %}tag-success{% endif %}">
+                            {{ '管理员' if user.role == 'admin' else '普通用户' }}
+                        </span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 3rem;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: 600; color: #3b82f6;">{{ borrowed_count }}</div>
+                        <div style="color: var(--gray-500); font-size: 0.85rem;">当前借阅</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: 600; color: var(--success);">{{ history_count }}</div>
+                        <div style="color: var(--gray-500); font-size: 0.85rem;">历史借阅</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="padding: 2rem; max-width: 500px;">
+                <h3 style="margin-bottom: 1.5rem; font-size: 1.1rem;">🔐 修改密码</h3>
+                <form method="POST">
+                    <div class="form-group">
+                        <label class="form-label">原密码</label>
+                        <input type="password" name="old_password" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">新密码</label>
+                        <input type="password" name="new_password" class="form-input" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">确认修改</button>
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>排行榜 - 智慧图书馆</title>
+    <link rel="stylesheet" href="/static/css/antd-style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="logo">
+                <div class="logo-icon">📚</div>
+                <span class="logo-text">智慧图书馆</span>
+            </a>
+            <nav class="nav">
+                <a href="/admin/dashboard" class="nav-item">仪表盘</a>
+                <a href="/admin/users" class="nav-item">用户</a>
+                <a href="/admin/ranking" class="nav-item active">排行</a>
+                <a href="/admin/add-book" class="nav-item">添加</a>
+            </nav>
+        </div>
+        <div class="header-right">
+            <div class="user-avatar">A</div>
+            <a href="/logout" class="btn btn-outline">退出</a>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                <div class="card">
+                    <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--gray-100);">
+                        <h3 style="font-size: 1rem;">📚 热门图书 TOP 10</h3>
+                    </div>
+                    {% for book in hot_books %}
+                    <div style="display: flex; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid var(--gray-50);">
+                        <div style="width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem; color: white; margin-right: 12px; {% if loop.index == 1 %}background: #f59e0b;{% elif loop.index == 2 %}background: #9ca3af;{% elif loop.index == 3 %}background: #cd7f32;{% else %}background: #3b82f6;{% endif %}">{{ loop.index }}</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 500; margin-bottom: 2px;">{{ book.title }}</div>
+                            <div style="font-size: 0.8rem; color: var(--gray-500);">{{ book.author }}</div>
+                        </div>
+                        <div style="color: #3b82f6; font-weight: 600;">{{ book.borrow_count }}次</div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="card">
+                    <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--gray-100);">
+                        <h3 style="font-size: 1rem;">⭐ 活跃用户 TOP 10</h3>
+                    </div>
+                    {% for user, borrow_count in active_users %}
+                    <div style="display: flex; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid var(--gray-50);">
+                        <div style="width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem; color: white; margin-right: 12px; {% if loop.index == 1 %}background: #f59e0b;{% elif loop.index == 2 %}background: #9ca3af;{% elif loop.index == 3 %}background: #cd7f32;{% else %}background: #3b82f6;{% endif %}">{{ loop.index }}</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 500; margin-bottom: 2px;">{{ user.username }}</div>
+                            <div style="font-size: 0.8rem; color: var(--gray-500);">{{ user.role }}</div>
+                        </div>
+                        <div style="color: #3b82f6; font-weight: 600;">{{ borrow_count }}次</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

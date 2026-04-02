@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的借阅 - 智慧图书馆</title>
+    <link rel="stylesheet" href="/static/css/antd-style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <a href="/" class="logo">
+                <div class="logo-icon">📚</div>
+                <span class="logo-text">智慧图书馆</span>
+            </a>
+            <nav class="nav">
+                <a href="/" class="nav-item">首页</a>
+                <a href="/search" class="nav-item">找书</a>
+                <a href="/my-books" class="nav-item active">借阅</a>
+                <a href="/profile" class="nav-item">我的</a>
+            </nav>
+        </div>
+        <div class="header-right">
+            {% if session.username %}
+                <div class="user-avatar">{{ session.username[0:1] }}</div>
+            {% endif %}
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="message message-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="tabs">
+                <a href="/my-books" class="tab active">全部</a>
+                <a href="/my-books?filter=borrowed" class="tab">借阅中</a>
+                <a href="/my-books?filter=returned" class="tab">已归还</a>
+            </div>
+
+            {% if records %}
+                {% for record in records %}
+                <div class="borrow-card">
+                    <div class="borrow-cover">📖</div>
+                    <div class="borrow-info">
+                        <div class="borrow-title">{{ record.book.title if record.book else record.book_title }}</div>
+                        <div class="borrow-meta">{{ record.book.author if record.book else record.book_author }}</div>
+                        <div class="borrow-dates">
+                            <span>借阅：{{ record.borrow_date.strftime('%Y-%m-%d') if record.borrow_date else '-' }}</span>
+                            <span>应还：{{ record.due_date.strftime('%Y-%m-%d') if record.due_date else '-' }}</span>
+                        </div>
+                    </div>
+                    <div class="borrow-action">
+                        {% if record.status == 'borrowed' %}
+                            {% if record.due_date and record.due_date < datetime.utcnow() %}
+                                <span class="tag tag-danger">已逾期</span>
+                            {% else %}
+                                <span class="tag tag-warning">借阅中</span>
+                            {% endif %}
+                            <a href="/return/{{ record.id }}" class="btn btn-primary" style="margin-top: 8px;" onclick="return confirm('确认归还？')">还书</a>
+                        {% else %}
+                            <span class="tag tag-success">已归还</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty">
+                    <div class="empty-icon">📚</div>
+                    <p class="empty-text">暂无借阅记录</p>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+</body>
+</html>
