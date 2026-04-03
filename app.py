@@ -8,10 +8,12 @@ import os
 app = Flask(__name__)
 app.secret_key = 'library-management-system-secret-key-2024'
 
-# 测试模式配置 - 检查环境变量
+# 数据库配置 - 支持 PostgreSQL (Neon/Railway) 和 SQLite (本地)
 if os.environ.get('TESTING') == 'true':
     app.config['TESTING'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+elif os.environ.get('DATABASE_URL'):
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///library.db'
 
