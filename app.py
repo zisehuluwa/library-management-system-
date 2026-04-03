@@ -405,7 +405,7 @@ def api_books():
         'borrow_count': b.borrow_count
     } for b in books])
 
-# 初始化数据库
+# 初始化数据库（保留原函数，方便本地开发）
 def init_db():
     with app.app_context():
         db.create_all()
@@ -428,8 +428,14 @@ def init_db():
 
         db.session.commit()
 
+# ========== [Railway部署关键] 生产环境下 Gunicorn 启动时自动建表 ==========
+# 这行代码确保在 Railway 上（不执行 __main__）也能初始化数据库
+init_db()
+# ====================================================================
+
 if __name__ == '__main__':
-    init_db()
+    # 本地开发时使用（因为上面已经调用过 init_db()，这里可注释，但保留也无妨）
+    # init_db()   # 如果不想重复调用可以注释掉，但重复调用也没副作用
     print("\n" + "="*50)
     print("🚀 图书管理系统已启动！")
     print("📱 访问地址: http://localhost:5000")
